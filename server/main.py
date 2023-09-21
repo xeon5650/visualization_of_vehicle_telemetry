@@ -1,41 +1,35 @@
-from sanic import Sanic
-from sanic.response import html, text
+from sanic import Sanic, response, json as sjs
 import psycopg2
-import folium
-from folium import plugins
-import branca
+import json
+from sanic_ext import Extend
 
 app = Sanic("app")
+app.config.CORS_ORIGINS = "*"
+Extend(app)
 
-@app.route('/getcarcoord/<vin:str>')
-async def test(request, vin: str):
+@app.route('/getcarcoordlocaly/<vin:str>/<lat:float>/<lon:float>')
+async def getcarcoord(request, vin: str, lat: float, lon: float):
     try:
         conn = psycopg2.connect("dbname='vehicle_telemetry' user='postgres' host='localhost' password='1111'")
         with conn:
             with conn.cursor() as db_curs:
-                db_curs.execute(f" SELECT lon, lat, \"gpsSpeed\" FROM public.vehicle_data WHERE vin = '{vin}'; ")
+                db_curs.execute(f" SELECT lon, lat, \"gpsSpeed\" FROM public.vehicle_data WHERE vin = '{vin}' AND lon-{lon} < 3 AND lat-{lat}<3; ")
                 result = db_curs.fetchall()
-
-                world_map = folium.Map(location=[43.23, 76.9], zoom_start=13, prefer_canvas=True, disable_3d=False)
-
-                colormap = branca.colormap.LinearColormap(colors=['blue', 'green', 'yellow', 'red'],
-                                                          index=[10, 40, 60, 90], vmin=0,
-                                                          vmax=110)
-                colormap.caption = 'Vehicle speed'
-                colormap.add_to(world_map)
 
                 heatdata = []
                 for el in result:
                     heatdata.append([el[1], el[0], el[2]])
 
-                plugins.HeatMap(heatdata, radius=18).add_to(world_map)
+                answer = json.dumps(heatdata)
 
-                return html(world_map)
+                print("Here")
+
+                return sjs(answer, headers={"Access-Control-Allow-Methods":"*", "Access-Control-Allow-Headers":"Content-type", "Access-Control-Allow-Origin":"http://localhost:63342/vehicle_telemetry/index.html?_ijt=c0sm6iss7bp6ht0cmieim292uf&_ij_reload=RELOAD_ON_SAVE"})
 
 
     except Exception as inst:
         print(inst)
-        return text("Error")
+        return json({"Error": inst})
 
 
 if __name__ == '__main__':

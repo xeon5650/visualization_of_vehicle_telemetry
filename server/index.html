@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<head>
+   <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
+   <script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/xmlhttprequest@1.8.0/lib/XMLHttpRequest.min.js"></script>
+   <script src="leaflet-heat.js"></script>
+
+
+
+
+
+
+
+<style>
+
+#map {
+  position:absolute;
+  top:0;
+  bottom:0;
+  right:0;
+  left:0;
+}
+
+</style>
+</head>
+<body>
+
+        <div id="map" style="width: 960px; height: 500px"></div>
+
+<script>
+
+
+
+var map = L.map('map').setView([43.23, 76.9], 13);
+
+L.tileLayer('http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.jpg', {maxZoom: 18}).addTo(map);
+
+
+
+function click(e){
+    var coord = e.latlng.toString().split(',');
+    var lat = coord[0].split('(');
+	var lng = coord[1].split(')');
+	console.log("You clicked the map at latitude: " + lat[1] + " and longitude:" + lng[0]);
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("GET", "http://127.0.0.1:8000/getcarcoordlocaly/MX1J7AGGXPK052972/${lat[1]}/${lng[0]}");
+    xhr.setRequestHeader("Access-Control-Allow-Origin", "http://127.0.0.1:8000/getcarcoordlocaly/MX1J7AGGXPK052972/${lat[1]}/${lng[0]}");
+    xhr.send();
+    console.log(xhr.status);
+    xhr.responseType = "json";
+    xhr.onload = () => {
+    if (xhr.readyState == 4 && xhr.status == 200) {
+      const data = xhr.response;
+      console.log(data);
+      // Отрисовка heatmap по data
+    } else {
+      console.log(`Error: ${xhr.status}`);
+    }
+
+};
+
+};
+map.on('click', click)
+
+</script>
+
+</body>
