@@ -38,6 +38,7 @@ L.tileLayer('http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.jpg', {maxZoom: 18})
 
 
 function click(e){
+    console.log(e.type);
     var coord = e.latlng.toString().split(',');
     var lat = coord[0].split('(');
 	var lng = coord[1].split(')');
@@ -48,13 +49,14 @@ function click(e){
     xhr.open("GET", "http://127.0.0.1:8000/getcarcoordlocaly/MX1J7AGGXPK052972/${lat[1]}/${lng[0]}");
     xhr.setRequestHeader("Access-Control-Allow-Origin", "http://127.0.0.1:8000/getcarcoordlocaly/MX1J7AGGXPK052972/${lat[1]}/${lng[0]}");
     xhr.send();
-    console.log(xhr.status);
     xhr.responseType = "json";
     xhr.onload = () => {
     if (xhr.readyState == 4 && xhr.status == 200) {
       const data = xhr.response;
       console.log(data);
+
       // Отрисовка heatmap по data
+
     } else {
       console.log(`Error: ${xhr.status}`);
     }
@@ -62,7 +64,7 @@ function click(e){
 };
 
 };
-map.on('click', click)
+map.on('mousedown', click)
 
 </script>
 
