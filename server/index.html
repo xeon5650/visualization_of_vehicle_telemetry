@@ -38,7 +38,6 @@ L.tileLayer('http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.jpg', {maxZoom: 18})
 
 
 function click(e){
-    console.log(e.type);
     var coord = e.latlng.toString().split(',');
     var lat = coord[0].split('(');
 	var lng = coord[1].split(')');
