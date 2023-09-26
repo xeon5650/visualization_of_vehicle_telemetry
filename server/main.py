@@ -7,13 +7,13 @@ app = Sanic("app")
 app.config.CORS_ORIGINS = "*"
 Extend(app)
 
-@app.route('/getcarcoordlocaly/<vin:str>/<lat:float>/<lon:float>')
+@app.route('/getcar/<vin:str>/<lat:float>/<lon:float>')
 async def getcarcoord(request, vin: str, lat: float, lon: float):
     try:
         conn = psycopg2.connect("dbname='vehicle_telemetry' user='postgres' host='localhost' password='1111'")
         with conn:
             with conn.cursor() as db_curs:
-                db_curs.execute(f" SELECT lon, lat, \"gpsSpeed\" FROM public.vehicle_data WHERE vin = '{vin}' AND lon-{lon} < 3 AND lat-{lat}<3; ")
+                db_curs.execute(f" SELECT lon, lat, \"gpsSpeed\" FROM public.vehicle_data WHERE vin = '{vin}' AND lon - {lon} < 1 AND lat - {lat} < 1; ")
                 result = db_curs.fetchall()
 
                 heatdata = []
@@ -22,7 +22,7 @@ async def getcarcoord(request, vin: str, lat: float, lon: float):
 
                 answer = json.dumps(heatdata)
 
-                return sjs(answer, headers={"Access-Control-Allow-Methods":"*", "Access-Control-Allow-Headers":"Content-type", "Access-Control-Allow-Origin":"http://localhost:63342/vehicle_telemetry/index.html?_ijt=c0sm6iss7bp6ht0cmieim292uf&_ij_reload=RELOAD_ON_SAVE"})
+                return sjs(answer, headers={"Access-Control-Allow-Methods":"*", "Access-Control-Allow-Headers":"Content-type", "Access-Control-Allow-Origin":"*"})
 
 
     except Exception as inst:

@@ -2,26 +2,8 @@
 <head>
    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css" />
    <script src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/xmlhttprequest@1.8.0/lib/XMLHttpRequest.min.js"></script>
    <script src="leaflet-heat.js"></script>
-
-
-
-
-
-
-
-<style>
-
-#map {
-  position:absolute;
-  top:0;
-  bottom:0;
-  right:0;
-  left:0;
-}
-
-</style>
+    <script src='Leaflet.js'></script>
 </head>
 <body>
 
@@ -29,13 +11,10 @@
 
 <script>
 
-
-
-var map = L.map('map').setView([43.23, 76.9], 13);
+var map = L.map('map').setView([51.25, 71.5], 10);
 
 L.tileLayer('http://{s}.tile.stamen.com/terrain/{z}/{x}/{y}.jpg', {maxZoom: 18}).addTo(map);
-
-
+var heat = L.heatLayer([], {radius: 25}).addTo(map);
 
 function click(e){
     var coord = e.latlng.toString().split(',');
@@ -45,16 +24,20 @@ function click(e){
 
     const xhr = new XMLHttpRequest();
 
-    xhr.open("GET", "http://127.0.0.1:8000/getcarcoordlocaly/MX1J7AGGXPK052972/${lat[1]}/${lng[0]}");
-    xhr.setRequestHeader("Access-Control-Allow-Origin", "http://127.0.0.1:8000/getcarcoordlocaly/MX1J7AGGXPK052972/${lat[1]}/${lng[0]}");
+    xhr.open("GET", ("http://127.0.0.1:8000/getcar/MX1J7AGGXPK052972/"+lat[1]+"/"+lng[0]).replace(" ",""));
+    xhr.setRequestHeader("Access-Control-Allow-Origin", "http://127.0.0.1:8000");
     xhr.send();
     xhr.responseType = "json";
     xhr.onload = () => {
     if (xhr.readyState == 4 && xhr.status == 200) {
-      const data = xhr.response;
+      data = JSON.parse(xhr.response);
       console.log(data);
 
-      // Отрисовка heatmap по data
+      map.eachLayer(function (layer) {
+        map.removeLayer(layer);
+      });
+
+      var heat = L.heatLayer(data, {radius: 25}).addTo(map);
 
     } else {
       console.log(`Error: ${xhr.status}`);
