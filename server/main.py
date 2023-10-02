@@ -13,12 +13,12 @@ async def getcarcoord(request, vin: str, lat: float, lon: float):
         conn = psycopg2.connect("dbname='vehicle_telemetry' user='postgres' host='localhost' password='1111'")
         with conn:
             with conn.cursor() as db_curs:
-                db_curs.execute(f" SELECT lon, lat, \"gpsSpeed\" FROM public.vehicle_data WHERE vin = '{vin}' AND lon - {lon} < 1 AND lat - {lat} < 1; ")
+                db_curs.execute(f" SELECT lon, lat, \"gpsSpeed\" FROM public.vehicle_data WHERE vin = '{vin}' AND (ABS(lon - {lon}) < 0.1 AND ABS(lat - {lat}) < 0.1); ")
                 result = db_curs.fetchall()
 
                 heatdata = []
                 for el in result:
-                    heatdata.append([el[1], el[0], el[2]])
+                    heatdata.append([el[1], el[0], el[2]/100])
 
                 answer = json.dumps(heatdata)
 
